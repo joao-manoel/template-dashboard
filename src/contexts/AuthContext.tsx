@@ -10,9 +10,10 @@ import {
   useEffect,
   useState,
 } from 'react'
-
+import { toast } from 'react-toastify'
 
 import { api } from '@/services/apiClient'
+import { TRANSLATE } from '@/utils/translate'
 
 type AuthProviderProps = {
   children: ReactNode
@@ -72,7 +73,6 @@ type AuthContextData = {
   user: User | undefined
   isAuthenticated: boolean
   isLoading: boolean
-  errorMessage: string | undefined
 }
 
 type ErrorSignInResponse = {
@@ -94,7 +94,6 @@ export const AuthContext = createContext({} as AuthContextData)
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User>()
-  const [errorMessage, setErrorMessage] = useState<string | undefined>()
   const [isLoading, setLoading] = useState<boolean>(false)
   const isAuthenticated = !!user
 
@@ -154,8 +153,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
       setLoading(false)
     } catch (err) {
       if (isAxiosError<ErrorSignInResponse>(err)) {
-        setErrorMessage(err.response?.data.error)
         setLoading(false)
+        if (err.response) {
+          toast.error(TRANSLATE(err.response.data.error))
+          return
+        }
+
+        toast.error('OPS! Algo deu errado.')
       }
     }
   }
@@ -168,7 +172,6 @@ export function AuthProvider({ children }: AuthProviderProps) {
         user,
         isAuthenticated,
         isLoading,
-        errorMessage,
       }}
     >
       {children}

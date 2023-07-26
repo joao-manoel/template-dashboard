@@ -1,8 +1,10 @@
 'use client'
-import axios, { AxiosError } from 'axios'
-import { GetServerSidePropsContext } from 'next'
-import { parseCookies, setCookie } from 'nookies'
-import { AuthTokenError } from './errors/AuthTokenError'
+import { TRANSLATE } from '@/utils/translate';
+import axios, { AxiosError } from 'axios';
+import { GetServerSidePropsContext } from 'next';
+import { parseCookies, setCookie } from 'nookies';
+import { toast } from 'react-toastify';
+import { AuthTokenError } from './errors/AuthTokenError';
 
 type ResponseRefreshToken = {
   refreshToken: string
@@ -36,7 +38,10 @@ export function setupAPIClient(
       return response
     },
     (error) => {
-      // console.log('>>', error)
+      
+      if (!error.response) {
+        toast.error(TRANSLATE(error.message))        
+      }
 
       if (error.response?.status === 401) {
         if (error.code === 'token.expired') {
